@@ -1,0 +1,40 @@
+name: PR Load Test
+
+# When to run the workflow
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    paths:
+      - 'load-test.js'
+      - 'Dockerfile'
+      - '.github/workflows/load-test.yml'
+
+jobs:
+  load-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Build k6 Docker image
+        run: |
+          docker buildx build \
+            --platform linux/amd64 \
+            -t my-k6-test:${{ github.sha }} . \
+            --load
+
+      - name: Run k6 load test
+        run: |
+          docker run --rm my-k6-test:${{ github.sha }}
+
+      - name: Upload k6 results
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: k6-summary-${{ github.run_id }}
+          path: k6-summary.json
