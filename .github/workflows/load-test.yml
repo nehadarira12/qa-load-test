@@ -1,6 +1,5 @@
 name: PR Load Test
 
-# When to run the workflow
 on:
   push:
     branches: [ main ]
@@ -34,7 +33,7 @@ jobs:
 
       - name: Upload k6 results
         if: always()
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: k6-summary-${{ github.run_id }}
           path: k6-summary.json
